@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import re
 
 zephyr_app = Flask(__name__)
 zephyr_app.config['SECRET_KEY'] = 'vasanth_nova_key'
@@ -30,6 +31,17 @@ def orion_auth_required(f):
 def homepage():
     return render_template('firstpage.html')
 
+def validate_password(password):
+    if len(password) < 8:
+        return False
+    if not re.search(r'[a-z]', password):
+        return False
+    if not re.search(r'[A-Z]', password):
+        return False
+    if not re.search(r'\d$', password):  # Ensures the password ends with a digit
+        return False
+    return True
+
 @zephyr_app.route('/nebula_register', methods=['GET', 'POST'])
 def nebula_register():
     if request.method == 'POST':
@@ -45,6 +57,10 @@ def nebula_register():
         
         if nova_password != nova_confirm_password:
             flash('Passwords do not match.', 'error')
+            return redirect(url_for('nebula_register'))
+        
+        if not validate_password(nova_password):
+            flash('Password must be at least 8 characters long, contain a lowercase letter, an uppercase letter, and end with a number.', 'error')
             return redirect(url_for('nebula_register'))
         
         existing_cosmos_user = CosmosUser.query.filter_by(nova_email=nova_email).first()
