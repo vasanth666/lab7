@@ -38,7 +38,7 @@ def validate_password(password):
         return False
     if not re.search(r'[A-Z]', password):
         return False
-    if not re.search(r'\d$', password):  # Ensures the password ends with a digit
+    if not re.search(r'\d$', password):  
         return False
     return True
 
